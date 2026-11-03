@@ -11,6 +11,9 @@ HEIGHT = 650
 FPS = 60
 
 pg.init()
+pg.mixer.init()  
+
+pg.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("こうかとんの杭打ち機回避ゲーム")
 clock = pg.time.Clock()
@@ -175,6 +178,9 @@ def draw_background(target_surf, bg_img):
         for y in range(0, HEIGHT, 50):
             pg.draw.line(target_surf, (32, 38, 58), (0, y), (WIDTH, y))
 
+pg.mixer.music.load("sound/bgm.mp3")
+pg.mixer.music.play(-1)
+pg.mixer.music.set_volume(0.3)
 
 def main():
     player = Player()
@@ -215,7 +221,8 @@ def main():
 
             if wall.collide(player.rect):
                 game_over = True
-
+                pg.mixer.music.stop()
+                
         draw_background(canvas, bg_img)
         wall.draw(canvas)
         player.draw(canvas)
