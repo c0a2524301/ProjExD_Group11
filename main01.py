@@ -66,15 +66,12 @@ class Player:
         keys = pg.key.get_pressed()
         spd = self.boost_speed if shift_pressed else self.normal_speed
 
-        is_moving = False
         if keys[pg.K_a] or keys[pg.K_LEFT]:
             self.x -= spd
             self.facing_right = False
-            is_moving = True
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
             self.x += spd
             self.facing_right = True
-            is_moving = True
 
         self.x = max(0, min(self.x, WIDTH - self.w))
         self.rect.x = self.x
