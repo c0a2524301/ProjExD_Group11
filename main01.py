@@ -181,12 +181,15 @@ def draw_background(target_surf, bg_img):
 pg.mixer.music.load("sound/bgm.mp3")
 pg.mixer.music.play(-1)
 pg.mixer.music.set_volume(0.3)
+impact_se = pg.mixer.Sound("sound/impact.mp3")
+impact_se.set_volume(0.7)
 
 def main():
     player = Player()
     wall = HammerWall(base_speed=15.0)
     score = 0
     game_over = False
+    prev_state = wall.state
 
     canvas = pg.Surface((WIDTH, HEIGHT))
     big_shake_timer = 0
@@ -218,11 +221,15 @@ def main():
                 score += 1
                 wall.base_down_speed = 15.0 + score * 0.5
                 big_shake_timer = 10
+                
+            if wall.state == "falling" and prev_state != "falling":
+                impact_se.play()
 
+            prev_state = wall.state
             if wall.collide(player.rect):
                 game_over = True
                 pg.mixer.music.stop()
-                
+
         draw_background(canvas, bg_img)
         wall.draw(canvas)
         player.draw(canvas)
