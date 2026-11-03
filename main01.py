@@ -66,12 +66,15 @@ class Player:
         keys = pg.key.get_pressed()
         spd = self.boost_speed if shift_pressed else self.normal_speed
 
+        is_moving = False
         if keys[pg.K_a] or keys[pg.K_LEFT]:
             self.x -= spd
             self.facing_right = False
+            is_moving = True
         if keys[pg.K_d] or keys[pg.K_RIGHT]:
             self.x += spd
             self.facing_right = True
+            is_moving = True
 
         self.x = max(0, min(self.x, WIDTH - self.w))
         self.rect.x = self.x
@@ -178,20 +181,22 @@ def draw_background(target_surf, bg_img):
         for y in range(0, HEIGHT, 50):
             pg.draw.line(target_surf, (32, 38, 58), (0, y), (WIDTH, y))
 
-pg.mixer.music.load("sound/bgm.mp3")
-pg.mixer.music.play(-1)
-pg.mixer.music.set_volume(0.3)
-impact_se = pg.mixer.Sound("sound/impact.mp3")
-impact_se.set_volume(0.7)
-score_se = pg.mixer.Sound("sound/score.mp3")
-score_se.set_volume(0.4)
+pg.mixer.music.load("sound/bgm.mp3") # BGMの読み込み
+pg.mixer.music.play(-1) # BGMをループ再生 (-1)
+pg.mixer.music.set_volume(0.3) # BGMの音量調整
+impact_se = pg.mixer.Sound("sound/impact.mp3") # 壁落下（インパクト）音の読み込み
+impact_se.set_volume(0.7) # インパクト音の音量調整
+score_se = pg.mixer.Sound("sound/score.mp3") # スコアアップ音の読み込み
+score_se.set_volume(0.4) # スコアアップ音の音量調整
+dash_se = pg.mixer.Sound("sound/dash.mp3") # ダッシュ音の読み込み
+dash_se.set_volume(1) # ダッシュ音の音量調整
 
 def main():
     player = Player()
     wall = HammerWall(base_speed=15.0)
     score = 0
     game_over = False
-    prev_state = wall.state
+    prev_state = wall.state 
 
     canvas = pg.Surface((WIDTH, HEIGHT))
     big_shake_timer = 0
@@ -215,23 +220,29 @@ def main():
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
+            # Shiftキー（Lシフト/Rシフト）が押された瞬間にダッシュ音を再生
+            if event.type == pg.KEYDOWN and (event.key == pg.K_LSHIFT or event.key == pg.K_RSHIFT):
+                dash_se.play()
 
         if not game_over:
+            keys = pg.key.get_pressed()
+            if shift_pressed and (keys[pg.K_a] or keys[pg.K_LEFT] or keys[pg.K_d] or keys[pg.K_RIGHT]):
+                pass
             player.update(shift_pressed)
 
             if wall.update():
                 score += 1
                 wall.base_down_speed = 15.0 + score * 0.5
                 big_shake_timer = 10
-                score_se.play()
-                
+                score_se.play() # スコアが加算された瞬間にスコアアップ音を再生
+            # 壁の状態が "falling（落下開始）" に変わった瞬間にインパクト音を再生   
             if wall.state == "falling" and prev_state != "falling":
                 impact_se.play()
 
             prev_state = wall.state
             if wall.collide(player.rect):
                 game_over = True
-                pg.mixer.music.stop()
+                pg.mixer.music.stop() # 壁に当たってゲームオーバーになったらBGMを停止
 
         draw_background(canvas, bg_img)
         wall.draw(canvas)
