@@ -183,6 +183,8 @@ pg.mixer.music.play(-1)
 pg.mixer.music.set_volume(0.3)
 impact_se = pg.mixer.Sound("sound/impact.mp3")
 impact_se.set_volume(0.7)
+score_se = pg.mixer.Sound("sound/score.mp3")
+score_se.set_volume(0.4)
 
 def main():
     player = Player()
@@ -221,6 +223,7 @@ def main():
                 score += 1
                 wall.base_down_speed = 15.0 + score * 0.5
                 big_shake_timer = 10
+                score_se.play()
                 
             if wall.state == "falling" and prev_state != "falling":
                 impact_se.play()
